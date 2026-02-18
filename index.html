@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blackjack</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top HUD -->
+  <div id="hud">
+    <div id="hud-stats">
+      <span class="stat-item">W: <span id="stat-wins">0</span></span>
+      <span class="stat-item">L: <span id="stat-losses">0</span></span>
+      <span class="stat-item">P: <span id="stat-pushes">0</span></span>
+      <span class="stat-item">Streak: <span id="stat-streak">0</span></span>
+      <span class="stat-item">Best: $<span id="stat-best">0</span></span>
+    </div>
+    <div id="hud-level">
+      <div id="level-badge">
+        <span id="rank-label">Rookie</span>
+        <span id="level-label">Lv.1</span>
+      </div>
+      <div id="xp-bar-wrap">
+        <div id="xp-bar"></div>
+      </div>
+      <div id="xp-label">0 XP</div>
+    </div>
+    <div id="hud-cash">
+      $<span id="cash-display">1,000</span>
+    </div>
+  </div>
+
+  <!-- Main Table -->
+  <div id="table">
+
+    <!-- Dealer Zone -->
+    <div id="dealer-zone">
+      <div id="dealer-label">Dealer <span id="dealer-score"></span></div>
+      <div id="dealer-hand" class="hand-area"></div>
+    </div>
+
+    <!-- Player Zone -->
+    <div id="player-zone">
+      <div id="player-label">Player <span id="player-score"></span></div>
+      <div id="player-hands-wrap">
+        <div id="player-hand" class="hand-area active-hand"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Result Overlay -->
+  <div id="result-overlay" class="hidden">
+    <div id="result-text"></div>
+  </div>
+
+  <!-- Action Panel -->
+  <div id="action-panel">
+
+    <!-- Betting UI -->
+    <div id="betting-ui">
+      <div id="chip-tray">
+        <div class="chip" id="chip-10" data-value="10">
+          <span>$10</span>
+        </div>
+        <div class="chip" id="chip-20" data-value="20">
+          <span>$20</span>
+        </div>
+        <div class="chip" id="chip-50" data-value="50">
+          <span>$50</span>
+        </div>
+        <div class="chip" id="chip-100" data-value="100">
+          <span>$100</span>
+        </div>
+      </div>
+
+      <div id="bet-area">
+        <div id="bet-stack"></div>
+        <div id="bet-display">Bet: $<span id="bet-amount">0</span></div>
+      </div>
+
+      <div id="bet-buttons">
+        <button id="btn-clear-bet" class="btn-secondary">Clear</button>
+        <button id="btn-rebet" class="btn-secondary" disabled>Re-Bet</button>
+        <button id="btn-deal" class="btn-primary" disabled>Deal</button>
+      </div>
+    </div>
+
+    <!-- Player Actions -->
+    <div id="player-actions" class="hidden">
+      <button id="btn-hit" class="btn-action">Hit <kbd>H</kbd></button>
+      <button id="btn-stand" class="btn-action">Stand <kbd>S</kbd></button>
+      <button id="btn-double" class="btn-action">Double <kbd>D</kbd></button>
+      <button id="btn-split" class="btn-action" disabled>Split <kbd>P</kbd></button>
+    </div>
+
+    <!-- Result Actions -->
+    <div id="result-actions" class="hidden">
+      <button id="btn-next" class="btn-primary">Next Hand</button>
+      <button id="btn-rebet-result" class="btn-secondary">Re-Bet &amp; Deal</button>
+    </div>
+
+  </div>
+
+  <!-- Level-Up Toast -->
+  <div id="level-toast" class="hidden">
+    <div id="toast-content">
+      <div id="toast-title">LEVEL UP!</div>
+      <div id="toast-info"></div>
+    </div>
+  </div>
+
+  <!-- Contextual Strategy Tip Popup -->
+  <div id="tip-popup" class="hidden">
+    <div id="tip-situation"></div>
+    <div id="tip-action-badge"></div>
+    <div id="tip-reason"></div>
+    <div id="tip-arrow"></div>
+  </div>
+
+  <!-- Tips Modal -->
+  <button id="tips-btn" title="Strategy Tip">?</button>
+
+  <div id="tips-modal" class="hidden">
+    <div id="tips-content">
+      <button id="tips-close">&times;</button>
+      <h2>Blackjack Tips &amp; Rules</h2>
+
+      <h3>Basic Rules</h3>
+      <ul>
+        <li>Beat the dealer by getting closer to 21 without going over.</li>
+        <li>Face cards (J, Q, K) are worth 10. Aces are 1 or 11.</li>
+        <li>Blackjack (Ace + 10-value) pays <strong>3:2</strong>.</li>
+        <li>Dealer hits on soft 17 (Ace + 6).</li>
+        <li>Double Down: double your bet for exactly one more card.</li>
+        <li>Split: split a pair into two separate hands.</li>
+        <li>Split Aces receive only one card each and pay 1:1 (not 3:2).</li>
+      </ul>
+
+      <h3>Basic Strategy — Hard Totals</h3>
+      <table class="strategy-table">
+        <thead>
+          <tr>
+            <th>Your Hand</th>
+            <th>Dealer 2-6</th>
+            <th>Dealer 7-A</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>8 or less</td><td>Hit</td><td>Hit</td></tr>
+          <tr><td>9</td><td>Double</td><td>Hit</td></tr>
+          <tr><td>10</td><td>Double</td><td>Double</td></tr>
+          <tr><td>11</td><td>Double</td><td>Double</td></tr>
+          <tr><td>12</td><td>Stand</td><td>Hit</td></tr>
+          <tr><td>13–16</td><td>Stand</td><td>Hit</td></tr>
+          <tr><td>17+</td><td>Stand</td><td>Stand</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Basic Strategy — Soft Totals (Ace + X)</h3>
+      <table class="strategy-table">
+        <thead>
+          <tr>
+            <th>Your Hand</th>
+            <th>Dealer 2-6</th>
+            <th>Dealer 7-A</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>A+2, A+3</td><td>Double/Hit</td><td>Hit</td></tr>
+          <tr><td>A+4, A+5</td><td>Double</td><td>Hit</td></tr>
+          <tr><td>A+6</td><td>Double</td><td>Hit</td></tr>
+          <tr><td>A+7 (soft 18)</td><td>Stand/Double</td><td>Stand/Hit</td></tr>
+          <tr><td>A+8, A+9</td><td>Stand</td><td>Stand</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Pair Splitting</h3>
+      <table class="strategy-table">
+        <thead>
+          <tr>
+            <th>Pair</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>A-A, 8-8</td><td>Always Split</td></tr>
+          <tr><td>10-10, 5-5, 4-4</td><td>Never Split</td></tr>
+          <tr><td>9-9</td><td>Split vs 2–6, 8–9; Stand otherwise</td></tr>
+          <tr><td>7-7, 3-3, 2-2</td><td>Split vs 2–7</td></tr>
+          <tr><td>6-6</td><td>Split vs 2–6</td></tr>
+        </tbody>
+      </table>
+
+      <h3>XP &amp; Levels</h3>
+      <table class="strategy-table">
+        <thead>
+          <tr><th>Level</th><th>Rank</th><th>XP Required</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Rookie</td><td>0</td></tr>
+          <tr><td>2</td><td>Rookie</td><td>100</td></tr>
+          <tr><td>3</td><td>Amateur</td><td>250</td></tr>
+          <tr><td>4</td><td>Amateur</td><td>450</td></tr>
+          <tr><td>5</td><td>Sharp</td><td>700</td></tr>
+          <tr><td>6</td><td>Sharp</td><td>1,000</td></tr>
+          <tr><td>7</td><td>Pro</td><td>1,400</td></tr>
+          <tr><td>8</td><td>Pro</td><td>1,900</td></tr>
+          <tr><td>9</td><td>Expert</td><td>2,500</td></tr>
+          <tr><td>10</td><td>Expert</td><td>3,200</td></tr>
+          <tr><td>11</td><td>Master</td><td>4,000</td></tr>
+          <tr><td>12</td><td>Master</td><td>5,000</td></tr>
+          <tr><td>13</td><td>Legend</td><td>6,500</td></tr>
+        </tbody>
+      </table>
+      <p><em>XP per hand: Win +30 · Blackjack +50 · Push +10 · Loss +5 · Streak bonus +10 (3rd+ win)</em></p>
+
+      <h3>Keyboard Shortcuts</h3>
+      <table class="strategy-table">
+        <tbody>
+          <tr><td><kbd>H</kbd></td><td>Hit</td></tr>
+          <tr><td><kbd>S</kbd></td><td>Stand</td></tr>
+          <tr><td><kbd>D</kbd></td><td>Double Down</td></tr>
+          <tr><td><kbd>P</kbd></td><td>Split</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Bankruptcy Modal -->
+  <div id="bankruptcy-modal" class="hidden">
+    <div id="bankruptcy-content">
+      <h2>Busted!</h2>
+      <p>You've run out of money. Would you like to restart with $1,000?</p>
+      <button id="btn-restart" class="btn-primary">Start Over</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
